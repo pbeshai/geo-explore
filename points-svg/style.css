@@ -1,0 +1,14 @@
+
+.background {
+  fill: #fff;
+}
+
+.nation {
+  fill: #ddd;
+}
+
+.states {
+  fill: none;
+  stroke: #fff;
+  stroke-linejoin: round;
+}
