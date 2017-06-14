@@ -1,0 +1,37 @@
+---
+title: "Analyze Points"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(mapdata)
+```
+
+```{r}
+filename <- "~/Dropbox/data/usps/post_offices.pipe.csv"
+data <- read_delim(filename, "|", col_names = FALSE)
+```
+
+```{r}
+colnames(data) <- c('type', 'id', 'lat', 'lon', 'name')
+```
+
+```{r}
+usa <- map_data("usa")
+```
+
+
+```{r}
+
+data %>%
+  ggplot() + 
+  geom_polygon(data = usa, aes(x = long, y = lat, group = group)) + 
+  geom_point(data = data, aes(x = lon, y = lat), r = 3, color = 'red', alpha = 1 / 10) +
+  coord_quickmap()
+```
+
+```{r}
+write_csv(data, "~/code/js/geo-explore/data/post_offices.csv")
+```
+

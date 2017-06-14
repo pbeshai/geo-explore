@@ -5,13 +5,12 @@ var projection = d3.geoAlbersUsa()
 
 var path = d3.geoPath();
 
-
 var svg = d3.select('#map')
 var g = svg.append('g');
 var width = +svg.attr('width');
 var height = +svg.attr('height');
 
-function display(error, us) {
+function display(error, us, data) {
   console.log(error)
 
   var zoom = d3.zoom()
@@ -33,6 +32,16 @@ function display(error, us) {
     .attr('class', 'states')
     .attr('d', path);
 
+  var points = g.append('g')
+    .attr('class', 'points');
+
+  points.selectAll('.point')
+    .data(data)
+    .enter()
+    .append('circle')
+    .attr('cx', function(d) { return })
+
+
   svg.call(zoom);
 }
 
@@ -42,4 +51,5 @@ function zoomed() {
 
 d3.queue()
   .defer(d3.json, 'us-10m.v1.json')
+  .defer(d3.csv, 'post_offices.csv')
   .await(display);
