@@ -10,8 +10,22 @@ var g = svg.append('g');
 var width = +svg.attr('width');
 var height = +svg.attr('height');
 
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .html(function(d) { return d.name; });
+
+svg.call(tip);
+
 function display(error, us, data) {
   console.log(error)
+
+  data.forEach(function(d) {
+    var p = projection([+d.lon, +d.lat]);
+    if (p) {
+      d.x = p[0];
+      d.y = p[1];
+    }
+  })
 
   var zoom = d3.zoom()
     .scaleExtent([1,8])
@@ -39,7 +53,12 @@ function display(error, us, data) {
     .data(data)
     .enter()
     .append('circle')
-    .attr('cx', function(d) { return })
+    .attr('r', 2)
+    .attr('opacity', 1/8)
+    .attr('cx', function(d) { return d.x })
+    .attr('cy', function(d) { return d.y })
+    .on('mouseover', tip.show)
+    .on('mouseout', tip.hide);
 
 
   svg.call(zoom);
