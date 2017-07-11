@@ -1,14 +1,23 @@
-
+body {
+  background: #fafafa;
+  padding: 20px;
+}
 .background {
   fill: #fff;
 }
 
 .nation {
-  fill: #ddd;
+  fill: #e6e6e6;
 }
 
 .states {
   fill: none;
   stroke: #fff;
   stroke-linejoin: round;
+}
+
+svg {
+  display: block;
+  margin: auto;
+  border: 1px solid #eee;
 }
