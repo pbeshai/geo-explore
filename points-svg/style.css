@@ -1,10 +1,14 @@
-
+body {
+  background: #fafafa;
+  padding: 20px;
+  font-family: sans-serif;
+}
 .background {
   fill: #fff;
 }
 
 .nation {
-  fill: #ddd;
+  fill: #e6e6e6;
 }
 
 .states {
@@ -13,12 +17,17 @@
   stroke-linejoin: round;
 }
 
+svg {
+  display: block;
+  margin: auto;
+  border: 1px solid #eee;
+}
 
 /*tooltip*/
 
 .d3-tip {
   line-height: 1;
-  font-weight: bold;
+  font-weight: 300;
   padding: 12px;
   background: rgba(0, 0, 0, 0.8);
   color: #fff;
@@ -70,4 +79,13 @@
   margin: -4px 0 0 -1px;
   top: 50%;
   left: 100%;
+}
+
+.d3-tip h3 {
+  margin: 0 0 0.4em;
+  font-weight: 300;
+}
+
+.d3-tip div {
+  color: #ccc;
 }
