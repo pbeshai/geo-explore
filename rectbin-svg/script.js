@@ -62,7 +62,6 @@ function display(error, usTopo, postOfficeData) {
 
   var binnedData = rectbin(postOfficeData).filter(function (d) { return d.length > 0; });
   var maxCount = d3.max(binnedData, function (d) { return d.length; });
-  var radiusScale = d3.scaleSqrt().domain([0, maxCount]).range([0, 12]);
   var colorScale = d3.scaleSequential(d3.interpolateViridis).domain([0, maxCount]);
   console.log('binnedData', binnedData);
 
