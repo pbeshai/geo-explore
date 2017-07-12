@@ -5,6 +5,24 @@ var g = svg.append('g');
 var width = +svg.attr('width');
 var height = +svg.attr('height');
 
+// callback used after the zoom updates (pan or zoom)
+function zoomed() {
+  // we apply a transform directly to the SVG's main <g> tag which in effect
+  // will scale and translate everything directly. This is also known as
+  // "geometric zooming". For an example of "semantic zooming", see
+  // https://bl.ocks.org/mbostock/3680957
+  g.attr('transform', d3.event.transform);
+
+  // log the transform to see what is happening
+  console.log('Zoomed. Scale =', approx(d3.event.transform.k), 'Translate x =',
+    approx(d3.event.transform.x), 'y =', approx(d3.event.transform.y));
+
+  // helper function just for logging purposes to more readable numbers
+  function approx(d) {
+    return Math.round(1000 * d) / 1000;
+  }
+}
+
 function display(error, usTopo) {
   if (error) {
     console.error(error);
@@ -42,6 +60,18 @@ function display(error, usTopo) {
     .datum(statesGeo)
     .attr('class', 'states')
     .attr('d', path);
+
+
+  // the zoom handler. We set the min and max zoom levels with the scaleExtent
+  // and the min and max x and y values with the translateExtent. The translate
+  // extent makes it so we can only pan when zoomed in.
+  var zoom = d3.zoom()
+    .scaleExtent([1, 8])
+    .translateExtent([[0, 0], [width, height]])
+    .on('zoom', zoomed);
+
+  // add in zoom functionality to the svg element
+  svg.call(zoom);
 }
 
 // load the TopoJSON data file

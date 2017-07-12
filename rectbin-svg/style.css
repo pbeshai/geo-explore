@@ -86,6 +86,8 @@ svg {
   font-weight: 300;
 }
 
-.d3-tip div {
+.d3-tip ul {
+  margin: 0;
+  padding-left: 1em;
   color: #ccc;
 }

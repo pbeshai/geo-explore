@@ -23,6 +23,10 @@ svg {
   border: 1px solid #eee;
 }
 
+.hexagon {
+  stroke: #fff;
+  stroke-opacity: 0.2;
+}
 /*tooltip*/
 
 .d3-tip {
@@ -86,6 +90,8 @@ svg {
   font-weight: 300;
 }
 
-.d3-tip div {
+.d3-tip ul {
+  margin: 0;
+  padding-left: 1em;
   color: #ccc;
 }

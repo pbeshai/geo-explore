@@ -1,0 +1,1 @@
+Shows the bare minimum necessary to draw a US map using a topojson file from the [us-atlas](https://github.com/topojson/us-atlas) project. The topojson used does not have a projection applied to it yet, so this example demonstrates the use of using a projection from d3-geo and the handy `fitSize` function.

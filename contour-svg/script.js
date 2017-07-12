@@ -1,7 +1,7 @@
 var svg = d3.select('#map')
 var g = svg.append('g');
 var gMap = g.append('g').attr('class', 'map-group');
-var gPoints = g.append('g').attr('class', 'points');
+var gContour = g.append('g').attr('class', 'contours');
 
 // read in the dimensions from the SVG attributes
 var width = +svg.attr('width');
@@ -13,14 +13,7 @@ function zoomed() {
   // will scale and translate the map, but doesn't affect the points. We
   // need to translate the points as well but not scale them to accomplish
   // semantic zooming.
-  gMap.attr('transform', d3.event.transform);
-
-  // update the position of each point -- kind of slow with 20,000 points,
-  // so we cut down to 3000 points for this svg example.
-  gPoints.selectAll('.point')
-    .attr('transform', function (d) {
-      return 'translate(' + d3.event.transform.applyX(d.x) + ',' + d3.event.transform.applyY(d.y) + ')';
-    });
+  g.attr('transform', d3.event.transform);
 }
 
 function display(error, usTopo, postOfficeData) {
@@ -52,8 +45,7 @@ function display(error, usTopo, postOfficeData) {
     .scale(1280)
     .translate([480, 300]);
 
-  // for performance reasons, let's cut down to 3000 points
-  postOfficeData = d3.shuffle(postOfficeData).slice(0, 3000)
+  var pathWithProjection = d3.geoPath(projection);
 
   postOfficeData.forEach(function(d) {
     var p = projection([+d.lon, +d.lat]);
@@ -62,6 +54,27 @@ function display(error, usTopo, postOfficeData) {
       d.y = p[1];
     }
   });
+
+  var binSize = 30;
+  // prepare rectangle binning
+  var rectbin = d3.rectbin()
+    .x(function (d) { return d.x; })
+    .y(function (d) { return d.y; })
+    .dx(binSize)
+    .dy(binSize);
+
+  var binnedData = rectbin(postOfficeData);
+  var maxCount = d3.max(binnedData, function (d) { return d.length; });
+  var colorScale = d3.scaleSequential(d3.interpolateViridis).domain([0, maxCount]);
+  console.log('binnedData', binnedData);
+
+  const numContours = 50;
+  var contours = d3.contours()
+    .size([Math.ceil(width / binSize), Math.ceil(height / binSize)])
+    .thresholds(d3.range(0, maxCount, Math.ceil(maxCount / numContours)));
+  var contouredData = contours(binnedData.map(function (d) { return d.length; }));
+  console.log('contouredData', contouredData);
+
 
   // add in a rectangle for a colored background
   gMap.append('rect')
@@ -81,32 +94,15 @@ function display(error, usTopo, postOfficeData) {
     .attr('class', 'states')
     .attr('d', path);
 
-  // prepare the tooltip
-  var tip = d3.tip()
-    .attr('class', 'd3-tip')
-    .html(function(d) {
-      // capitalize the state name
-      var state = d.state.split(' ').map(function (state) {
-        return state[0].toUpperCase() + state.slice(1)
-      }).join(' ');
-
-      // show post office name and state
-      return '<h3>' + d.name + '</h3><div>' + state + '</div>';
-    });
-
-  svg.call(tip);
-
-  // add in the points
-  gPoints.selectAll('.point')
-    .data(postOfficeData)
-    .enter()
-    .append('circle')
-    .attr('class', 'point')
-    .attr('r', 3)
-    .attr('opacity', 0.2)
-    .attr('transform', function (d) { return 'translate(' + d.x + ', ' + d.y + ')'; })
-    .on('mouseover', tip.show)
-    .on('mouseout', tip.hide);
+  var pathIdentity = d3.geoPath(d3.geoIdentity().scale(binSize));
+  // add in the contours
+  gContour.selectAll('path')
+    .data(contouredData)
+    .enter().append('path')
+      .attr('class', 'contour')
+      .attr('d', pathIdentity)
+      .attr('fill', function(d) { return colorScale(d.value); })
+      .attr('fill-opacity', function(d) { return d.value < 1 ? 0 : 0.5; })
 
   // the zoom handler. We set the min and max zoom levels with the scaleExtent
   // and the min and max x and y values with the translateExtent. The translate
