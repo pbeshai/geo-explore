@@ -94,6 +94,20 @@ function display(error, usTopo, postOfficeData) {
     .attr('class', 'states')
     .attr('d', path);
 
+  // draw in the states path and nation on top of the contour
+  g.append('path')
+    .datum(nationGeo)
+    .style('fill', 'none')
+    .style('stroke', '#fff')
+    .style('stroke-opacity', 0.2)
+    .attr('d', path);
+
+  g.append('path')
+    .datum(statesGeo)
+    .attr('class', 'states')
+    .style('stroke-opacity', 0.2)
+    .attr('d', path);
+
   var pathIdentity = d3.geoPath(d3.geoIdentity().scale(binSize));
   // add in the contours
   gContour.selectAll('path')
