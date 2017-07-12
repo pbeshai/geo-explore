@@ -1,1 +1,1 @@
-Shows the bare minimum necessary to draw a US map using a topojson file from the [us-atlas](https://github.com/topojson/us-atlas) project.
+Shows how to draw a US map using a topojson file from the [us-atlas](https://github.com/topojson/us-atlas) project, while drawing a number of points across the map in SVG. It uses semantic zooming to make it easier to select individual points after zooming in.
