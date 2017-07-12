@@ -60,8 +60,10 @@ function display(error, usTopo, postOfficeData) {
     .extent([0, 0], [width, height])
     .radius(10);
 
-  var binnedData = hexbin(postOfficeData).sort(function(a, b) { return b.length - a.length; });
-  var radiusScale = d3.scaleSqrt().domain([0, binnedData[0].length]).range([0, 9]);
+  var binnedData = hexbin(postOfficeData)
+    // sort so biggest hexagons are below smaller ones
+    .sort(function(a, b) { return b.length - a.length; });
+  var radiusScale = d3.scaleSqrt().domain([0, binnedData[0].length]).range([0, 12]);
   var colorScale = d3.scaleSequential(d3.interpolateViridis).domain(radiusScale.domain());
   console.log('binnedData', binnedData);
 
@@ -100,6 +102,7 @@ function display(error, usTopo, postOfficeData) {
   gHex.selectAll('path')
     .data(binnedData)
     .enter().append('path')
+      .attr('class', 'hexagon')
       .attr('d', function(d) { return hexbin.hexagon(radiusScale(d.length)); })
       .attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; })
       .attr('fill', function(d) { return colorScale(d.length); })
