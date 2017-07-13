@@ -13,19 +13,12 @@ var statesGeo;
 var width = +canvas.attr('width');
 var height = +canvas.attr('height');
 
-// initialize zoom
-var zoomTransform = d3.zoomIdentity;
-
 function updateCanvas() {
   // save the context state
   context.save();
 
   // clear anything drawn on the canvas
   context.clearRect(0, 0, width, height);
-
-  // apply zoom transform
-  context.translate(zoomTransform.x, zoomTransform.y);
-  context.scale(zoomTransform.k, zoomTransform.k);
 
   // draw in the nation
   context.beginPath();
@@ -41,20 +34,6 @@ function updateCanvas() {
 
   // restore the context state
   context.restore();
-}
-
-function zoomed() {
-  zoomTransform = d3.event.transform;
-  updateCanvas();
-
-  // log the transform to see what is happening
-  console.log('Zoomed. Scale =', approx(zoomTransform.k), 'Translate x =',
-    approx(zoomTransform.x), 'y =', approx(zoomTransform.y));
-
-  // helper function just for logging purposes to more readable numbers
-  function approx(d) {
-    return Math.round(1000 * d) / 1000;
-  }
 }
 
 function display(error, data) {
@@ -75,18 +54,6 @@ function display(error, data) {
     // exclude exterior lines with an a !== b filter
     function(a, b) { return a !== b; });
   console.log('statesGeo', statesGeo);
-
-  // the zoom handler. We set the min and max zoom levels with the scaleExtent
-  // and the min and max x and y values with the translateExtent. The translate
-  // extent makes it so we can only pan when zoomed in.
-  var zoom = d3.zoom()
-    .scaleExtent([1, 8])
-    .translateExtent([[0, 0], [width, height]])
-    .on('zoom', zoomed);
-
-  // add the zoom functionality to the canvas element
-  canvas.call(zoom);
-
 
   // update the canvas with the data
   updateCanvas();
