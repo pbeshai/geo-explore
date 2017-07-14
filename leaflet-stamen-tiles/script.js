@@ -6,6 +6,7 @@ var zoom = 14;
 var map = L.map('map').setView([latitude, longitude], zoom);
 
 // try: toner, toner-lite, toner-hybrid, toner-lines, terrain
+// see: http://maps.stamen.com/#toner/12/37.7706/-122.3782
 var layer = new L.StamenTileLayer('toner-lite');
 
 // add the stamen layer to the map

@@ -4,7 +4,7 @@ var longitude = -95.7129;
 var zoom = 4;
 
 // intialize Leaflet on the #map element, centered on our lat/long and zoom level
-var map = L.map('map').setView([latitude, longitude], zoom);
+var map = L.map('map', { minZoom: 3, maxZoom: 7 }).setView([latitude, longitude], zoom);
 
 // to use mapbox tiles, we need an access token.
 // sign up for one here: https://www.mapbox.com/studio/account/tokens/
@@ -21,8 +21,6 @@ var mapboxTilesetId = 'mapbox.light';
 // add the tile layer to our map
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-    maxZoom: 7,
-    minZoom: 3,
     id: mapboxTilesetId,
     accessToken: mapboxAccessToken
 }).addTo(map);

@@ -1,0 +1,37 @@
+body {
+  background: #fafafa;
+  padding: 20px;
+  font-family: sans-serif;
+}
+
+.map-container {
+  width: 960px;
+  margin: auto;
+  border: 1px solid #ccc;
+}
+
+.info {
+  font-size: 14px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+  border-radius: 5px;
+}
+.info h4 {
+  margin: 0 0 5px;
+  color: #888;
+}
+
+.legend {
+  line-height: 16px;
+  color: #888;
+  font-size: 12px;
+}
+.legend i {
+  width: 16px;
+  height: 16px;
+  float: left;
+  margin-right: 8px;
+  opacity: 0.8;
+}

@@ -1,0 +1,1 @@
+Shows how to draw a leaflet slippy choropleth map with Stamen tiles, putting labels on top of the choropleth.
