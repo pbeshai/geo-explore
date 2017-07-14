@@ -25,8 +25,28 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
     accessToken: mapboxAccessToken
 }).addTo(map);
 
+// a global to hold our custom information control showing details about states
+// Note this is styled via CSS
+var info = L.control();
+
+info.onAdd = function (map) {
+  this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+  this.update();
+  return this._div;
+};
+
+// method that we will use to update the control based on feature properties passed
+info.update = function (props) {
+  this._div.innerHTML = '<h4>US Population Density</h4>' +  (props ?
+    '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
+    : 'Hover over a state');
+};
+
+info.addTo(map);
+
 // a global to hold our geojson layer
 var geojson;
+
 
 // callback when mousing over a feature to highlight it
 function highlightFeature(e) {
@@ -44,11 +64,18 @@ function highlightFeature(e) {
   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
     layer.bringToFront();
   }
+
+  // update the info panel
+  info.update(layer.feature.properties);
 }
 
 // reset style when not hovering
 function resetHighlight(e) {
   geojson.resetStyle(e.target);
+
+  // reset the info panel
+  info.update();
+
 }
 
 // zoom to the selected feature on click
