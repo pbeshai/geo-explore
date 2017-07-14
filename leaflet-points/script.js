@@ -3,7 +3,7 @@ var longitude = -95.7129;
 var zoom = 4;
 
 // intialize Leaflet on the #map element, centered on our lat/long and zoom level
-var map = L.map('map', { minZoom: 3, maxZoom: 7 }).setView([latitude, longitude], zoom);
+var map = L.map('map', { minZoom: 3, maxZoom: 18 }).setView([latitude, longitude], zoom);
 
 // to use mapbox tiles, we need an access token.
 // sign up for one here: https://www.mapbox.com/studio/account/tokens/
