@@ -25,6 +25,46 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
     accessToken: mapboxAccessToken
 }).addTo(map);
 
+// a global to hold our geojson layer
+var geojson;
+
+// callback when mousing over a feature to highlight it
+function highlightFeature(e) {
+  var layer = e.target;
+
+  layer.setStyle({
+    weight: 2,
+    color: '#fff',
+    opacity: 1,
+    dashArray: '',
+    fillOpacity: 0.7,
+  });
+
+  // IE, Edge and Opera have issues with bringing to front so ignore on them
+  if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+    layer.bringToFront();
+  }
+}
+
+// reset style when not hovering
+function resetHighlight(e) {
+  geojson.resetStyle(e.target);
+}
+
+// zoom to the selected feature on click
+function zoomToFeature(e) {
+  map.fitBounds(e.target.getBounds());
+}
+
+// add handlers to our choropleth data
+function onEachFeature(feature, layer) {
+  layer.on({
+    mouseover: highlightFeature,
+    mouseout: resetHighlight,
+    click: zoomToFeature
+  });
+}
+
 function display(error, statesGeo) {
   if (error) {
     console.error(error);
@@ -49,8 +89,7 @@ function display(error, statesGeo) {
   }
 
   // add the states GeoJSON data to the map
-  L.geoJson(statesGeo, { style: style }).addTo(map);
-
+  geojson = L.geoJson(statesGeo, { style: style, onEachFeature: onEachFeature }).addTo(map);
 }
 
 // load the GeoJSON data file
