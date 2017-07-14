@@ -108,6 +108,9 @@ function display(error, postOfficeData) {
         iconSize: L.point(40, 40)
       });
     },
+
+    // for 20,000 points we chunk the loading to prevent the browser from locking
+    chunkedLoading: true,
   });
   markers.addLayer(geoJsonMarkers);
 
