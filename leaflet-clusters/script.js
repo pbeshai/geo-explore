@@ -94,7 +94,21 @@ function display(error, postOfficeData) {
   })
 
   // create a cluster group and add all the markers to it
-  var markers = L.markerClusterGroup();
+  var markers = L.markerClusterGroup({
+    // custom function for styling the cluster (optional)
+    // we do this to color the clusters with the mean value of the points based on our color scale.
+    iconCreateFunction: function (cluster) {
+      var markers = cluster.getAllChildMarkers();
+      var meanStat = d3.mean(markers, function (marker) { return marker.feature.geometry.coordinates[1]; });
+      var color = colorScale(meanStat);
+
+      return L.divIcon({
+        html: '<div style="background: ' + color + '"><span>' + markers.length + '</span></div>',
+        className: 'cluster',
+        iconSize: L.point(40, 40)
+      });
+    },
+  });
   markers.addLayer(geoJsonMarkers);
 
   // add the cluster layer to the map

@@ -12,3 +12,12 @@ body {
 .leaflet-popup-content h3 {
   margin: 0 0 0.4em;
 }
+
+.cluster > div {
+  width: 40px;
+  height: 40px;
+  color: #fff;
+  line-height: 40px;
+  text-align: center;
+  border-radius: 100%;
+}
