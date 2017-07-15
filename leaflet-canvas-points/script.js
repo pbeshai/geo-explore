@@ -28,56 +28,6 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
 // define a color scale to color the points based on a property
 var colorScale = d3.scaleSequential(d3.interpolateInferno).domain([55, 25]);
 
-// converts a post office into a GeoJson feature point
-function convertToGeoJSONFeature(postOffice) {
-  // capitalize the state name
-  var state = postOffice.state.split(' ').map(function (state) {
-    return state[0].toUpperCase() + state.slice(1)
-  }).join(' ');
-
-  var geojsonFeature = {
-    type: 'Feature',
-    properties: {
-      name: postOffice.name,
-      amenity: 'Post Office',
-      popupContent: '<h3>' + postOffice.name + '</h3><div>' + state + '</div>' + postOffice.lat + ', ' + postOffice.lon,
-      state: state,
-      stateFips: postOffice.stateFips,
-      stateAbbr: postOffice.stateAbbr,
-    },
-    geometry: {
-      type: 'Point',
-      coordinates: [postOffice.lon, postOffice.lat],
-    },
-    id: postOffice.id,
-  };
-
-  return geojsonFeature;
-}
-
-function onEachFeature(feature, layer) {
-  // does this feature have a property named popupContent?
-  if (feature.properties && feature.properties.popupContent) {
-    layer.bindPopup(feature.properties.popupContent);
-  }
-}
-
-function tile2long(x,z) { return (x/Math.pow(2,z)*360-180); }
-
-function tile2lat(y,z) {
-    var n=Math.PI-2*Math.PI*y/Math.pow(2,z);
-    return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
-}
-
-// from https://gis.stackexchange.com/questions/17278/calculate-lat-lon-bounds-for-individual-tile-generated-from-gdal2tiles
-function tileToLatLng(tilePoint) {
-  var lng = tilePoint.x / Math.pow(2, tilePoint.z) * 360 - 180;
-  var n = Math.PI - 2 * Math.PI * tilePoint.y / Math.pow(2, tilePoint.z);
-  var lat = 180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
-
-  return L.latLng(lat, lng);
-}
-
 function display(error, postOfficeData) {
   if (error) {
     console.error(error);
@@ -90,103 +40,37 @@ function display(error, postOfficeData) {
     d.latLng = L.latLng(d.lat, d.lon);
   });
 
-  // limit to 1000 for now
-  // postOfficeData = d3.shuffle(postOfficeData).slice(0, 30);
-  postOfficeData = postOfficeData.slice(0, 5);
   console.log('postOfficeData', postOfficeData, postOfficeData[0]);
 
-  // wrap the features as a FeatureCollection
-  var postOfficeGeo = { type: 'FeatureCollection', features: postOfficeData.map(convertToGeoJSONFeature) };
-  console.log('postOfficeGeo', postOfficeGeo, postOfficeGeo.features[0]);
+  // use a CanvasLayer plugin from https://github.com/Sumbera/gLayers.Leaflet
+  L.canvasLayer()
+    .delegate({
+      onDrawLayer: function onDrawLayer(info) {
+        var canvas = info.canvas;
+        var context = canvas.getContext('2d');
+        var bounds = info.bounds;
+        var map = info.layer._map;
 
-  // style the points
-  var geojsonMarkerOptions = function (feature) {
-    return {
-      radius: pointRadius,
-      fillColor: colorScale(feature.geometry.coordinates[1]),
-      color: '#fff',
-      weight: 1,
-      opacity: 0,
-      fillOpacity: 0.8
-    };
-  }
+        context.save();
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.globalAlpha = 0.4;
 
-  // add the points to the map as a geojson layer
-  L.geoJSON(postOfficeGeo, {
-    pointToLayer: function (feature, latlng) {
-      return L.circleMarker(latlng, geojsonMarkerOptions(feature));
-    },
-    onEachFeature: onEachFeature,
-  })
-  // .addTo(map);
+        postOfficeData.forEach(function (d) {
+          if (bounds.contains(d.latLng)) {
+            const point = map.latLngToContainerPoint(d.latLng);
+            context.fillStyle = colorScale(d.lat);
 
-  L.GridLayer.CanvasCircles = L.GridLayer.extend({
-    createTile: function (coords) {
-      var tile = document.createElement('canvas');
+            context.beginPath();
+            context.arc(point.x, point.y, pointRadius, 0, 2 * Math.PI);
+            context.fill();
+          }
+        })
 
-      var tileSize = this.getTileSize();
-      tile.setAttribute('width', tileSize.x);
-      tile.setAttribute('height', tileSize.y);
-
-      var context = tile.getContext('2d');
-
-      // draw the points within this lat lng
-      var tileMinLatLng = tileToLatLng(coords);
-      // console.log(coords, tileMinLatLng);
-      var tileMaxLatLng = tileToLatLng({ x: coords.x + 1, y: coords.y + 1, z: coords.z });
-      // console.log(tileMinLatLng, tileMaxLatLng);
-
-      var minLat = Math.min(tileMinLatLng.lat, tileMaxLatLng.lat);
-      var minLng = Math.min(tileMinLatLng.lng, tileMaxLatLng.lng);
-      var maxLat = Math.max(tileMinLatLng.lat, tileMaxLatLng.lat);
-      var maxLng = Math.max(tileMinLatLng.lng, tileMaxLatLng.lng);
-
-      // filter to the right points
-      var filteredPoints = postOfficeData.filter(function (d) {
-        return minLat <= d.lat && d.lat < maxLat &&
-          minLng <= d.lon && d.lon < maxLng;
-      });
-
-      if (filteredPoints.length) {
-        console.log(minLat, maxLat, minLng, maxLng)
+        context.restore();
       }
-      console.log('cpTLP', map.containerPointToLayerPoint([0, 0]));
-      context.fillStyle = '#0f0';
-      // context.globalAlpha = 0.2;
-      filteredPoints.forEach(function (d) {
-        context.beginPath();
-        const point = map.latLngToLayerPoint(d.latLng);
-        console.log('d =', d.latLng, point);
-        context.arc(point.x, point.y, pointRadius * 10, 0, 2 * Math.PI);
-        context.fill();
-      });
-
-
-      return tile;
-    }
-  });
-
-  map.addLayer(new L.GridLayer.CanvasCircles());
+    })
+    .addTo(map);
 }
-
-L.GridLayer.DebugCoords = L.GridLayer.extend({
-  createTile: function (coords) {
-    var tile = document.createElement('div');
-    var tileSize = this.getTileSize();
-    var coordString = [coords.x, coords.y, coords.z].join(', ');
-    var latLng = tileToLatLng(coords);
-    // var latLng = map.layerPointToLatLng(tilePoint);
-    tile.innerHTML = coordString + '<br/>' + latLng;
-    tile.style.outline = '1px solid red';
-    return tile;
-  }
-});
-
-L.gridLayer.debugCoords = function(opts) {
-  return new L.GridLayer.DebugCoords(opts);
-};
-
-map.addLayer( L.gridLayer.debugCoords() );
 
 // post_offices_with_states.csv includes locations and names of post offices across USA.
 d3.queue()
