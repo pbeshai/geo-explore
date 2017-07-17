@@ -1,0 +1,10 @@
+body {
+  background: #fafafa;
+  padding: 20px;
+}
+
+.map-container {
+  width: 960px;
+  margin: auto;
+  border: 1px solid #ccc;
+}
